@@ -1,7 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QImage
 
 DOCKER_TITLE = 'Image to Palette'
 
