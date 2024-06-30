@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=image_to_palette
+X-Python-2-Compatible=false
+X-Krita-Manual=Manual.html
+Name=image_to_palette
+Comment=Extracting a color palette from an image
