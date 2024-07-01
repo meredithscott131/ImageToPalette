@@ -24,6 +24,14 @@ class ImageToPalette(QDockWidget):
         self.palette_layout = QGridLayout()
         self.palette_layout.setAlignment(Qt.AlignTop)  # Align grid layout to the top
 
+         # Initialize the grid with white color labels
+        for i in range(10):
+            row, col = divmod(i, 5)
+            color_label = QLabel()
+            color_label.setFixedSize(50, 50)
+            color_label.setStyleSheet("background-color: #919191;")
+            self.palette_layout.addWidget(color_label, row, col)
+
         # Create button
         self.button = QPushButton('Select Image')
         self.button.clicked.connect(self.openFileDialog)
