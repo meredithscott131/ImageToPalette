@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QImage, QColor
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout
+from PyQt5.QtCore import Qt, QSize
+
 from collections import Counter
+from PyQt5.QtGui import QImage
 
 DOCKER_TITLE = 'Image to Palette'
 
@@ -20,17 +21,9 @@ class ImageToPalette(QDockWidget):
         main_widget = QWidget()
         main_layout = QVBoxLayout()
 
-        # Create a grid layout for the color palette (2 rows, 5 columns)
+        # Create a grid layout for the color palette
         self.palette_layout = QGridLayout()
         self.palette_layout.setAlignment(Qt.AlignTop)  # Align grid layout to the top
-
-         # Initialize the grid with white color labels
-        for i in range(10):
-            row, col = divmod(i, 5)
-            color_label = QLabel()
-            color_label.setFixedSize(50, 50)
-            color_label.setStyleSheet("background-color: #919191;")
-            self.palette_layout.addWidget(color_label, row, col)
 
         # Create button
         self.button = QPushButton('Select Image')
@@ -44,6 +37,10 @@ class ImageToPalette(QDockWidget):
         # Set main layout
         main_widget.setLayout(main_layout)
         self.setWidget(main_widget)
+
+    def sizeHint(self):
+        # Override sizeHint to set initial size of the docker widget
+        return QSize(300, 400)  # Adjust these values as needed
 
     def openFileDialog(self):
         # Open file dialog to select image
@@ -68,7 +65,7 @@ class ImageToPalette(QDockWidget):
                 color = image.pixelColor(x, y).rgb()
                 color_counter[color] += 1
 
-        # Get the 10 most common colors
+        # Get the most common colors (up to 10)
         most_common_colors = color_counter.most_common(10)
         palette = [color for color, _ in most_common_colors]
         print(f"Palette: {palette}")
@@ -79,13 +76,24 @@ class ImageToPalette(QDockWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Display the palette in the grid layout (2 rows, 5 columns)
+        # Display the palette in the grid layout dynamically
+        num_colors = len(palette)
+        num_cols = min(num_colors, 5)  # Maximum of 5 columns
+        num_rows = (num_colors + num_cols - 1) // num_cols  # Calculate number of rows
+
         for i, color in enumerate(palette):
-            row, col = divmod(i, 5)
+            row, col = divmod(i, num_cols)
             color_label = QLabel()
             color_label.setFixedSize(50, 50)
             color_label.setStyleSheet(f"background-color: #{color:06x};")
-            self.palette_layout.addWidget(color_label, row, col)
+            self.palette_layout.addWidget(color_label, row, col, Qt.AlignCenter)
+
+        # Set row and column stretches
+        for r in range(num_rows):
+            self.palette_layout.setRowStretch(r, 1)
+
+        for c in range(num_cols):
+            self.palette_layout.setColumnStretch(c, 1)
 
 # Initialize the application (for standalone testing)
 if __name__ == '__main__':
