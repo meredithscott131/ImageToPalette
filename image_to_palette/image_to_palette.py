@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy, QHBoxLayout
 from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QImage, QIcon
 from collections import Counter
-from PyQt5.QtGui import QImage
+import random
 
 DOCKER_TITLE = 'Image to Palette'
 
@@ -16,9 +17,35 @@ class ImageToPalette(QDockWidget):
         self.initUI()
 
     def initUI(self):
+        # Load styles from CSS file
+        with open('styles.css', 'r') as f:
+            self.setStyleSheet(f.read())
+
         # Create main widget and layout
         main_widget = QWidget()
         main_layout = QVBoxLayout()
+
+        # Create a horizontal layout for buttons
+        button_layout = QHBoxLayout()
+
+        # Create "Select Image" button
+        self.button_select = QPushButton()
+        self.button_select.setIcon(Krita.instance().icon('document-open'))
+        self.button_select.setToolTip("Select Image")
+        self.button_select.clicked.connect(self.openFileDialog)
+
+        # Create "Regenerate Palette" button with Krita icon
+        self.button_regenerate = QPushButton()
+        self.button_regenerate.setIcon(Krita.instance().icon('view-refresh'))
+        self.button_regenerate.setToolTip("Regenerate Palette")
+        self.button_regenerate.clicked.connect(self.regeneratePalette)
+
+        # Add buttons to the button layout
+        button_layout.addWidget(self.button_select)
+        button_layout.addWidget(self.button_regenerate)
+        button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+
+        main_layout.addLayout(button_layout)
 
         # Create a grid layout for the color palette
         self.palette_layout = QGridLayout()
@@ -27,13 +54,7 @@ class ImageToPalette(QDockWidget):
         # Set margins for the palette layout
         self.palette_layout.setContentsMargins(5, 3, 5, 5)  # Add margins (left, top, right, bottom)
 
-        # Create button
-        self.button = QPushButton('Select Image')
-        self.button.clicked.connect(self.openFileDialog)
-        self.button.setStyleSheet("text-align: left; padding-left: 10px;")
-
         # Adding components
-        main_layout.addWidget(self.button, alignment=Qt.AlignTop)
         main_layout.addLayout(self.palette_layout)
 
         # Set main layout
@@ -73,6 +94,9 @@ class ImageToPalette(QDockWidget):
         # Get the most common colors
         most_common_colors = color_counter.most_common()
         
+        # Shuffle the list of most common colors
+        random.shuffle(most_common_colors)
+        
         # Manually select diverse colors
         num_colors = 15
         step = len(most_common_colors) // num_colors
@@ -81,13 +105,14 @@ class ImageToPalette(QDockWidget):
         print(f"Palette: {palette}")
 
         # Clear the previous palette
-        while self.palette_layout.count():
-            item = self.palette_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        self.clearPalette()
 
         # Display the palette in the grid layout dynamically
         self.displayColorsInGrid(palette)
+
+    def regeneratePalette(self):
+        if self.image_path:
+            self.createColorPalette()
 
     def createDefaultGrid(self):
         # Create a default grid with placeholder colors
@@ -112,6 +137,13 @@ class ImageToPalette(QDockWidget):
 
         for c in range(num_cols):
             self.palette_layout.setColumnStretch(c, 1)
+
+    def clearPalette(self):
+        # Clear the previous palette
+        while self.palette_layout.count():
+            item = self.palette_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
 # Initialize the application (for standalone testing)
 if __name__ == '__main__':
