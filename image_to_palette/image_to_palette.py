@@ -1,7 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy
 from PyQt5.QtCore import Qt, QSize
-
 from collections import Counter
 from PyQt5.QtGui import QImage
 
@@ -40,6 +39,9 @@ class ImageToPalette(QDockWidget):
         # Set main layout
         main_widget.setLayout(main_layout)
         self.setWidget(main_widget)
+
+        # Create the default grid with placeholder colors
+        self.createDefaultGrid()
 
     def sizeHint(self):
         # Override sizeHint to set initial size of the docker widget
@@ -80,11 +82,20 @@ class ImageToPalette(QDockWidget):
                 item.widget().deleteLater()
 
         # Display the palette in the grid layout dynamically
-        num_colors = len(palette)
+        self.displayColorsInGrid(palette)
+
+    def createDefaultGrid(self):
+        # Create a default grid with placeholder colors
+        placeholder_colors = [0x919191] * 10  # Default grey color placeholders
+        self.displayColorsInGrid(placeholder_colors)
+
+    def displayColorsInGrid(self, colors):
+        # Determine grid size
+        num_colors = len(colors)
         num_cols = min(num_colors, 5)  # Maximum of 5 columns
         num_rows = (num_colors + num_cols - 1) // num_cols  # Calculate number of rows
 
-        for i, color in enumerate(palette):
+        for i, color in enumerate(colors):
             row, col = divmod(i, num_cols)
             color_label = QLabel()
             color_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set expanding size policy
