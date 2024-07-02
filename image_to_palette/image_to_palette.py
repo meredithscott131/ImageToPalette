@@ -70,9 +70,14 @@ class ImageToPalette(QDockWidget):
                 color = image.pixelColor(x, y).rgb()
                 color_counter[color] += 1
 
-        # Get the most common colors (up to 10)
-        most_common_colors = color_counter.most_common(10)
-        palette = [color for color, _ in most_common_colors]
+        # Get the most common colors
+        most_common_colors = color_counter.most_common()
+        
+        # Manually select diverse colors
+        num_colors = 15
+        step = len(most_common_colors) // num_colors
+        palette = [most_common_colors[i * step][0] for i in range(num_colors)]
+        
         print(f"Palette: {palette}")
 
         # Clear the previous palette
@@ -86,14 +91,13 @@ class ImageToPalette(QDockWidget):
 
     def createDefaultGrid(self):
         # Create a default grid with placeholder colors
-        placeholder_colors = [0x919191] * 10  # Default grey color placeholders
+        placeholder_colors = [0x919191] * 15  # Default grey color placeholders
         self.displayColorsInGrid(placeholder_colors)
 
     def displayColorsInGrid(self, colors):
         # Determine grid size
-        num_colors = len(colors)
-        num_cols = min(num_colors, 5)  # Maximum of 5 columns
-        num_rows = (num_colors + num_cols - 1) // num_cols  # Calculate number of rows
+        num_cols = 5
+        num_rows = 3
 
         for i, color in enumerate(colors):
             row, col = divmod(i, num_cols)
