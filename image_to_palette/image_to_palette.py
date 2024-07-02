@@ -1,4 +1,5 @@
 import sys
+from krita import *
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy, QHBoxLayout
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QImage, QIcon
@@ -17,10 +18,6 @@ class ImageToPalette(QDockWidget):
         self.initUI()
 
     def initUI(self):
-        # Load styles from CSS file
-        with open('styles.css', 'r') as f:
-            self.setStyleSheet(f.read())
-
         # Create main widget and layout
         main_widget = QWidget()
         main_layout = QVBoxLayout()
@@ -31,20 +28,38 @@ class ImageToPalette(QDockWidget):
         # Create "Select Image" button
         self.button_select = QPushButton()
         self.button_select.setIcon(Krita.instance().icon('document-open'))
-        self.button_select.setToolTip("Select Image")
+        self.button_select.setFixedSize(32, 32)
+        self.button_select.setToolTip("Load Image")
+        self.button_select.setStyleSheet("""
+            QPushButton {
+                border: none;
+            }
+            QPushButton:hover {
+                border: 1px solid #5e5e5e;
+            }
+        """)
         self.button_select.clicked.connect(self.openFileDialog)
 
         # Create "Regenerate Palette" button with Krita icon
         self.button_regenerate = QPushButton()
         self.button_regenerate.setIcon(Krita.instance().icon('view-refresh'))
+        self.button_regenerate.setFixedSize(32, 32)
         self.button_regenerate.setToolTip("Regenerate Palette")
+        self.button_regenerate.setStyleSheet("""
+            QPushButton {
+                border: none;
+            }
+            QPushButton:hover {
+                border: 1px solid #5e5e5e;
+            }
+        """)
         self.button_regenerate.clicked.connect(self.regeneratePalette)
 
         # Add buttons to the button layout
         button_layout.addWidget(self.button_select)
         button_layout.addWidget(self.button_regenerate)
         button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-
+        
         main_layout.addLayout(button_layout)
 
         # Create a grid layout for the color palette
