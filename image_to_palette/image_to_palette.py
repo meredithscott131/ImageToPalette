@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy
 from PyQt5.QtCore import Qt, QSize
 
 from collections import Counter
@@ -24,6 +24,9 @@ class ImageToPalette(QDockWidget):
         # Create a grid layout for the color palette
         self.palette_layout = QGridLayout()
         self.palette_layout.setAlignment(Qt.AlignTop)  # Align grid layout to the top
+
+        # Set margins for the palette layout
+        self.palette_layout.setContentsMargins(5, 3, 5, 5)  # Add margins (left, top, right, bottom)
 
         # Create button
         self.button = QPushButton('Select Image')
@@ -84,9 +87,9 @@ class ImageToPalette(QDockWidget):
         for i, color in enumerate(palette):
             row, col = divmod(i, num_cols)
             color_label = QLabel()
-            color_label.setFixedSize(50, 50)
+            color_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set expanding size policy
             color_label.setStyleSheet(f"background-color: #{color:06x};")
-            self.palette_layout.addWidget(color_label, row, col, Qt.AlignCenter)
+            self.palette_layout.addWidget(color_label, row, col)
 
         # Set row and column stretches
         for r in range(num_rows):
