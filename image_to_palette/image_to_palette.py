@@ -161,19 +161,28 @@ class ImageToPalette(QDockWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-    def setFGColor(self, event, c):
+    def setFGColor(self, event, color):
         activeView = Krita.instance().activeWindow().activeView()
         
+        # Create a ManagedColor object
         colorRed = ManagedColor("RGBA", "U8", "")
+        
+        # Extract RGB components from the color
+        red = ((color >> 16) & 0xFF) / 255.0
+        green = ((color >> 8) & 0xFF) / 255.0
+        blue = (color & 0xFF) / 255.0
+        
+        # Set the color components
         colorComponents = colorRed.components()
-        colorComponents[0] = 1.0 # Red???
-        colorComponents[1] = 0.0 # Green???
-        colorComponents[2] = 0.0 # Blue???
-        colorComponents[3] = 1.0 # Alpha???
-        print(colorComponents) # the final values set
+        colorComponents[0] = red
+        colorComponents[1] = green
+        colorComponents[2] = blue
+        colorComponents[3] = 1.0  # Alpha (fully opaque)
+        
+        # Set the components back to the ManagedColor object
         colorRed.setComponents(colorComponents)
-
-        # fill the canvas with our custom set color
+        
+        # Set the foreground color in the active view
         activeView.setForeGroundColor(colorRed)
 
 
