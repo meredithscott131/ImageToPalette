@@ -2,7 +2,7 @@ import sys
 from krita import *
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QApplication, QDockWidget, QPushButton, QFileDialog, QGridLayout, QSizePolicy, QHBoxLayout
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QImage, QIcon
+from PyQt5.QtGui import QImage, QColor, QPalette, QBrush
 from collections import Counter
 import random
 
@@ -144,6 +144,7 @@ class ImageToPalette(QDockWidget):
             color_label = QLabel()
             color_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set expanding size policy
             color_label.setStyleSheet(f"background-color: #{color:06x};")
+            color_label.mousePressEvent = lambda event, c=color: self.setFGColor(event, c)
             self.palette_layout.addWidget(color_label, row, col)
 
         # Set row and column stretches
@@ -159,6 +160,22 @@ class ImageToPalette(QDockWidget):
             item = self.palette_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
+
+    def setFGColor(self, event, c):
+        activeView = Krita.instance().activeWindow().activeView()
+        
+        colorRed = ManagedColor("RGBA", "U8", "")
+        colorComponents = colorRed.components()
+        colorComponents[0] = 1.0 # Red???
+        colorComponents[1] = 0.0 # Green???
+        colorComponents[2] = 0.0 # Blue???
+        colorComponents[3] = 1.0 # Alpha???
+        print(colorComponents) # the final values set
+        colorRed.setComponents(colorComponents)
+
+        # fill the canvas with our custom set color
+        activeView.setForeGroundColor(colorRed)
+
 
 # Initialize the application (for standalone testing)
 if __name__ == '__main__':
