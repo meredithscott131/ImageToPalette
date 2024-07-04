@@ -174,9 +174,9 @@ class ImageToPalette(QDockWidget):
         
         # Set the color components
         colorComponents = colorRed.components()
-        colorComponents[0] = red
+        colorComponents[0] = blue
         colorComponents[1] = green
-        colorComponents[2] = blue
+        colorComponents[2] = red
         colorComponents[3] = 1.0  # Alpha (fully opaque)
         
         # Set the components back to the ManagedColor object
