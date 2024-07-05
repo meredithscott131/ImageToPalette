@@ -1,7 +1,7 @@
 from krita import *
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QImage
+from PyQt5.QtCore import Qt, QSize, QUrl, QPropertyAnimation, QVariantAnimation
+from PyQt5.QtGui import QImage, QDragEnterEvent, QDropEvent, QColor
 from collections import Counter
 import random
 from .Button import Button
@@ -20,7 +20,7 @@ class ImageToPalette(QDockWidget):
     # Setting the initial UI of the docker
     def initUI(self):
         # Creating main widget and layout
-        main_widget = QWidget()
+        self.main_widget = QWidget()
         main_layout = QVBoxLayout()
 
         # Creating a horizontal layout for buttons
@@ -46,11 +46,14 @@ class ImageToPalette(QDockWidget):
         main_layout.addLayout(self.palette_layout)
 
         # Setting main layout
-        main_widget.setLayout(main_layout)
-        self.setWidget(main_widget)
+        self.main_widget.setLayout(main_layout)
+        self.setWidget(self.main_widget)
 
         # Setting the default grid with placeholder colors
         self.createDefaultGrid()
+
+        # Store the original background color
+        self.original_bg_color = self.main_widget.palette().color(self.main_widget.backgroundRole())
     
     # Override sizeHint to set initial size of the docker widget
     def sizeHint(self):
@@ -110,3 +113,43 @@ class ImageToPalette(QDockWidget):
     # Clearing the current palette
     def clearPalette(self):
         self.palette_layout.clearPalette()
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasUrls():
+            urls = event.mimeData().urls()
+            for url in urls:
+                if url.isLocalFile() and url.toLocalFile().lower().endswith(('.png', '.jpg', '.bmp')):
+                    self.animateBackgroundColor(QColor('#636363'))
+                    event.acceptProposedAction()
+                    return
+        event.ignore()
+    
+    def dragLeaveEvent(self, event: QDragLeaveEvent):
+        self.animateBackgroundColor(self.original_bg_color)  # Default color
+    
+    def dropEvent(self, event: QDropEvent):
+        urls = event.mimeData().urls()
+        if urls:
+            for url in urls:
+                if url.isLocalFile() and url.toLocalFile().lower().endswith(('.png', '.jpg', '.bmp')):
+                    self.image_path = url.toLocalFile()
+                    print(f"Dropped image path: {self.image_path}")
+                    self.createColorPalette()
+                    event.acceptProposedAction()
+                    self.animateBackgroundColor(self.original_bg_color)  # Reset color after drop
+                    return
+        event.ignore()
+
+    def animateBackgroundColor(self, color):
+        self.animation = QVariantAnimation(self)
+        self.animation.setDuration(200)  # Duration of the fade
+        self.animation.setStartValue(self.main_widget.palette().color(self.main_widget.backgroundRole()))
+        self.animation.setEndValue(color)
+        self.animation.valueChanged.connect(self.setBackgroundColor)
+        self.animation.start()
+
+    def setBackgroundColor(self, color):
+        palette = self.main_widget.palette()
+        palette.setColor(self.main_widget.backgroundRole(), color)
+        self.main_widget.setPalette(palette)
+        self.main_widget.setAutoFillBackground(True)

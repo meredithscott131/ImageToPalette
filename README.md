@@ -14,6 +14,7 @@ Inspiration: [PaletteGenerator](https://github.com/kaichi1342/PaletteGenerator?t
 
 ## Demo
 <video src="screenshots\demo.mp4" controls></video>
+Done with v1.0.0
 
 ## Setup
 
@@ -33,8 +34,11 @@ Inspiration: [PaletteGenerator](https://github.com/kaichi1342/PaletteGenerator?t
 Krita 5.2.3
 
 ### Release Log
-07/04/2024 **Version 1.0**
-- First released version.
+07/04/2024 **Version 1.0.0**
+- First released version
+
+07/05/2024 **Version 1.0.1**
+- Added drag and drop
 
 ### License
 Image to Palette is shared under the GNU General Public License (GPL), version 3.
