@@ -1,5 +1,5 @@
 from krita import DockWidgetFactory, DockWidgetFactoryBase
-from .image_to_palette import ImageToPalette
+from .ImageToPalette import ImageToPalette
 
 DOCKER_ID = 'image_to_palette_docker'
 instance = Krita.instance()
