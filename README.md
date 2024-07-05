@@ -33,7 +33,7 @@ https://github.com/meredithscott131/ImageToPalette/assets/123319516/e461b7cd-cad
 Krita 5.2.3
 
 ### Release Log
-07/04/2024 **Version 1.0**
+07/04/2024 **Version 1.0.0**
 - First released version.
 
 ### License
