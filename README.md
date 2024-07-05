@@ -9,11 +9,11 @@ Inspiration: [PaletteGenerator](https://github.com/kaichi1342/PaletteGenerator?t
 | Feature | Description |
 | ----------- | ----------- |
 | Load Image | Button that launches the dialog to select an image file. |
-| Regenerate Palette | Button that regenerates the color palette from the current loaded image. |
+| Regenerate Palette | Button that regenerates the color palette from the currently loaded image. |
 | Generated Color Output | Grid of selectable colors. |
 
 ## Demo
-<video src="screenshots\demo.mp4" controls></video>
+https://github.com/meredithscott131/ImageToPalette/assets/123319516/e461b7cd-cadb-4d56-8fd6-712ae82d16b2 
 
 ## Setup
 
