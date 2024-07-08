@@ -1,8 +1,9 @@
 from krita import *
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog
 from PyQt5.QtCore import Qt, QSize, QUrl, QPropertyAnimation, QVariantAnimation
 from PyQt5.QtGui import QImage, QDragEnterEvent, QDropEvent, QColor
 from collections import Counter
+import json
 import random
 from .Button import Button
 from .PaletteGrid import PaletteGrid
@@ -34,9 +35,13 @@ class ImageToPalette(QDockWidget):
         self.button_regenerate = Button(icon_name='view-refresh', tooltip='Regenerate Palette')
         self.button_regenerate.clicked.connect(self.regeneratePalette)
 
+        self.button_save = QPushButton("Save")
+        self.button_save.clicked.connect(self.save_palette)
+
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
         button_layout.addWidget(self.button_regenerate)
+        button_layout.addWidget(self.button_save)
         button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         
         main_layout.addLayout(button_layout)
@@ -153,3 +158,21 @@ class ImageToPalette(QDockWidget):
         palette.setColor(self.main_widget.backgroundRole(), color)
         self.main_widget.setPalette(palette)
         self.main_widget.setAutoFillBackground(True)
+    
+    def get_palette_colors(self):
+        # Implement this function to return the current palette colors
+        # Example: return a list of color hex codes
+        return ['#FF5733', '#33FF57', '#3357FF']
+
+    def save_palette(self):
+        # Get the palette colors
+        palette_colors = self.get_palette_colors()
+        
+        # Open a file dialog to select the save location
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getSaveFileName(None, "Save Palette", "", "JSON Files (*.json);;All Files (*)", options=options)
+        
+        if file_name:
+            # Save the palette colors to the selected file
+            with open(file_name, 'w') as file:
+                json.dump(palette_colors, file)
