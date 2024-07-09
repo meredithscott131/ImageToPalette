@@ -1,12 +1,10 @@
 from krita import *
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog
-from PyQt5.QtCore import Qt, QSize, QUrl, QPropertyAnimation, QVariantAnimation
-from PyQt5.QtGui import QImage, QDragEnterEvent, QDropEvent, QColor
-from collections import Counter
-import json
-import random
+from PyQt5.QtCore import Qt, QSize, QVariantAnimation
+from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor
 from .Button import Button
 from .PaletteGrid import PaletteGrid
+from .Palette import Palette
 
 DOCKER_TITLE = 'Image to Palette'
 
@@ -16,6 +14,7 @@ class ImageToPalette(QDockWidget):
         self.setWindowTitle(DOCKER_TITLE)
         self.setAcceptDrops(True)
         self.image_path = None
+        self.palette = Palette()  # Initialize Palette object
         self.initUI()
 
     # Setting the initial UI of the docker
@@ -35,13 +34,19 @@ class ImageToPalette(QDockWidget):
         self.button_regenerate = Button(icon_name='view-refresh', tooltip='Regenerate Palette')
         self.button_regenerate.clicked.connect(self.regeneratePalette)
 
+        # Creating "Save Palette" button
         self.button_save = QPushButton("Save")
         self.button_save.clicked.connect(self.save_palette)
+
+        # Creating "Load Palette" button
+        self.button_load_palette = QPushButton("Load Palette")
+        self.button_load_palette.clicked.connect(self.load_palette)
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
         button_layout.addWidget(self.button_regenerate)
         button_layout.addWidget(self.button_save)
+        button_layout.addWidget(self.button_load_palette)
         button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         
         main_layout.addLayout(button_layout)
@@ -70,54 +75,35 @@ class ImageToPalette(QDockWidget):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Image", "", "Image Files (*.png *.jpg *.bmp);;All Files (*)", options=options)
         if file_path:
             self.image_path = file_path
-            print(f"Selected image path: {self.image_path}")
             self.createColorPalette()
 
     # Generating a color palette from the set image path
     def createColorPalette(self):
-        # Loading the image
-        image = QImage(self.image_path)
+        self.palette.createColorPalette(self.image_path)
+        self.displayPalette()
 
-        # Resizing the image to reduce the number of pixels to process
-        image = image.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
-        # Counting the frequency of each color in the image
-        color_counter = Counter()
-        for x in range(image.width()):
-            for y in range(image.height()):
-                color = image.pixelColor(x, y).rgb()
-                color_counter[color] += 1
-
-        # Collecting and shuffling the most common colors
-        most_common_colors = color_counter.most_common()
-        random.shuffle(most_common_colors)
-        
-        # Manually selecting diverse colors
-        num_colors = 15
-        step = len(most_common_colors) // num_colors
-        palette = [most_common_colors[i * step][0] for i in range(num_colors)]
-        
-        print(f"Palette: {palette}")
-
-        # Clearing the previous palette
-        self.clearPalette()
-
-        # Displaying the palette in the grid layout
-        self.palette_layout.displayColorsInGrid(palette, selectable=True)
+    # Display the palette in the grid layout
+    def displayPalette(self):
+        self.palette_layout.displayColorsInGrid(self.palette)
 
     # Regenerating the color palette from the current image path
     def regeneratePalette(self):
-        if self.image_path:
-            self.createColorPalette()
+        self.palette.regeneratePalette()
+        self.displayPalette()
 
     # Setting the default palette grid to a gray placeholder color
     def createDefaultGrid(self):
-        placeholder_colors = [0x919191] * 15
-        self.palette_layout.displayColorsInGrid(placeholder_colors, selectable=False)
+        placeholder_palette = Palette()
+        for _ in range(15):
+            placeholder_palette.add_color("#919191")
+        self.palette_layout.displayColorsInGrid(placeholder_palette, selectable=False)
 
-    # Clearing the current palette
-    def clearPalette(self):
-        self.palette_layout.clearPalette()
+    def save_palette(self):
+        self.palette.save_palette()
+
+    def load_palette(self):
+        self.palette.load_palette()
+        self.displayPalette()
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
@@ -138,7 +124,6 @@ class ImageToPalette(QDockWidget):
             for url in urls:
                 if url.isLocalFile() and url.toLocalFile().lower().endswith(('.png', '.jpg', '.bmp')):
                     self.image_path = url.toLocalFile()
-                    print(f"Dropped image path: {self.image_path}")
                     self.createColorPalette()
                     event.acceptProposedAction()
                     self.animateBackgroundColor(self.original_bg_color)  # Reset color after drop
@@ -158,21 +143,3 @@ class ImageToPalette(QDockWidget):
         palette.setColor(self.main_widget.backgroundRole(), color)
         self.main_widget.setPalette(palette)
         self.main_widget.setAutoFillBackground(True)
-    
-    def get_palette_colors(self):
-        # Implement this function to return the current palette colors
-        # Example: return a list of color hex codes
-        return ['#FF5733', '#33FF57', '#3357FF']
-
-    def save_palette(self):
-        # Get the palette colors
-        palette_colors = self.get_palette_colors()
-        
-        # Open a file dialog to select the save location
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getSaveFileName(None, "Save Palette", "", "JSON Files (*.json);;All Files (*)", options=options)
-        
-        if file_name:
-            # Save the palette colors to the selected file
-            with open(file_name, 'w') as file:
-                json.dump(palette_colors, file)
