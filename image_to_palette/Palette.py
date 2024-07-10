@@ -9,7 +9,7 @@ class Palette:
     def __init__(self):
         self.name = "Default"
         self.colors = []
-        self.most_common_colors = []  # Store all most_common_colors
+        self.most_common_colors = []
 
     def add_color(self, color):
         self.colors.append(color)
@@ -72,12 +72,12 @@ class Palette:
             self.add_color(f'#{color:06x}')
 
     def regeneratePalette(self):
-        if self.most_common_colors:
-            num_colors = 15
-            step = len(self.most_common_colors) // num_colors
-            palette_colors = [self.most_common_colors[i * step][0] for i in range(num_colors)]
+        random.shuffle(self.most_common_colors)
+        num_colors = 15
+        step = len(self.most_common_colors) // num_colors
+        palette_colors = [self.most_common_colors[i * step][0] for i in range(num_colors)]
 
-            self.clear_colors()
+        self.clear_colors()
 
-            for color in palette_colors:
-                self.add_color(f'#{color:06x}')
+        for color in palette_colors:
+            self.add_color(f'#{color:06x}')

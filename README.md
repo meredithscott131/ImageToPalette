@@ -37,8 +37,9 @@ Krita 5.2.3
 07/04/2024 **Version 1.0.0**
 - First released version
 
-07/05/2024 **Version 1.0.1**
+07/08/2024 **Version 1.1.0**
 - Added drag and drop
+- Added saving
 
 ### License
 Image to Palette is shared under the GNU General Public License (GPL), version 3.
