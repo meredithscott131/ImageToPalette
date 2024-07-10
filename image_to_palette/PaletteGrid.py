@@ -2,14 +2,16 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QSizePolicy
 from PyQt5.QtCore import Qt
 from krita import ManagedColor, Krita
 
+# The grid displaying the selectable colors in the palette
 class PaletteGrid(QGridLayout):
     def __init__(self):
         super().__init__()
         self.setAlignment(Qt.AlignTop)
         self.setContentsMargins(5, 3, 5, 5)
 
+    # Displaying the color labels in the grid
     def displayColorsInGrid(self, palette, selectable=True):
-        colors = [int(color.lstrip('#'), 16) for color in palette.colors]
+        colors = [int(color.lstrip('#'), 16) for color in palette.cur_colors]
         num_cols = 5
         num_rows = (len(colors) + num_cols - 1) // num_cols
 
@@ -28,12 +30,7 @@ class PaletteGrid(QGridLayout):
         for c in range(num_cols):
             self.setColumnStretch(c, 1)
 
-    def clearPalette(self):
-        while self.count():
-            item = self.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
+    # Setting the current foreground color of the canvas
     def setFGColor(self, event, color):
         activeView = Krita.instance().activeWindow().activeView()
         managedColor = ManagedColor("RGBA", "U8", "")

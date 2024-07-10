@@ -14,7 +14,7 @@ class ImageToPalette(QDockWidget):
         self.setWindowTitle(DOCKER_TITLE)
         self.setAcceptDrops(True)
         self.image_path = None
-        self.palette = Palette()  # Initialize Palette object
+        self.palette = Palette()
         self.initUI()
 
     # Setting the initial UI of the docker
@@ -33,10 +33,13 @@ class ImageToPalette(QDockWidget):
         # Creating "Regenerate Palette" button
         self.button_regenerate = Button(icon_name='view-refresh', tooltip='Regenerate Palette')
         self.button_regenerate.clicked.connect(self.regeneratePalette)
+        self.button_regenerate.setEnabled(False)
 
         # Creating "Save Palette" button
-        self.button_save = QPushButton("Save")
+        self.button_save = Button(icon_name='document-save', tooltip='Save Palette')
         self.button_save.clicked.connect(self.save_palette)
+        self.button_save.setEnabled(False)
+
 
         # Creating "Load Palette" button
         self.button_load_palette = QPushButton("Load Palette")
@@ -79,8 +82,11 @@ class ImageToPalette(QDockWidget):
 
     # Generating a color palette from the set image path
     def createColorPalette(self):
-        self.palette.createColorPalette(self.image_path)
+        self.palette.collectColors(self.image_path)
+        self.palette.generatePalette()
         self.displayPalette()
+        self.button_regenerate.setEnabled(True) 
+        self.button_save.setEnabled(True)
 
     # Display the palette in the grid layout
     def displayPalette(self):
@@ -88,7 +94,7 @@ class ImageToPalette(QDockWidget):
 
     # Regenerating the color palette from the current image path
     def regeneratePalette(self):
-        self.palette.regeneratePalette()
+        self.palette.generatePalette()
         self.displayPalette()
 
     # Setting the default palette grid to a gray placeholder color
@@ -104,6 +110,8 @@ class ImageToPalette(QDockWidget):
     def load_palette(self):
         self.palette.load_palette()
         self.displayPalette()
+        self.button_regenerate.setEnabled(True)
+        self.button_save.setEnabled(True)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
