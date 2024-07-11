@@ -25,9 +25,11 @@ class ImageToPalette(QDockWidget):
 
         # Creating a horizontal layout for buttons
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(5)  # Set spacing between buttons
+        button_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
 
         # Creating "Load Image" button
-        self.button_load = Button(icon_name='document-open', tooltip='Load Image')
+        self.button_load = Button(icon_name='folder-pictures', tooltip='Create Palette from Image')
         self.button_load.clicked.connect(self.openFile)
 
         # Creating "Regenerate Palette" button
@@ -42,14 +44,14 @@ class ImageToPalette(QDockWidget):
 
 
         # Creating "Load Palette" button
-        self.button_load_palette = QPushButton("Load Palette")
+        self.button_load_palette = Button(icon_name='document-open', tooltip='Load Palette')
         self.button_load_palette.clicked.connect(self.load_palette)
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
-        button_layout.addWidget(self.button_regenerate)
-        button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_load_palette)
+        button_layout.addWidget(self.button_save)
+        button_layout.addWidget(self.button_regenerate)
         button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         
         main_layout.addLayout(button_layout)
