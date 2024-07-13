@@ -54,7 +54,7 @@ class ImageToPalette(QDockWidget):
         self.recent_palettes_dropdown.setEditable(True)
         self.recent_palettes_dropdown.lineEdit().setReadOnly(True)
         self.recent_palettes_dropdown.lineEdit().setText("Recent Palettes")
-        self.recent_palettes_dropdown.lineEdit().setAlignment(Qt.AlignCenter)
+        self.recent_palettes_dropdown.lineEdit().setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.recent_palettes_dropdown.setMaxVisibleItems(5)
 
         # Adding buttons to the button layout
