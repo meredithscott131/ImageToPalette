@@ -1,6 +1,6 @@
 from krita import *
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel
-from PyQt5.QtCore import Qt, QSize, QVariantAnimation
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel, QComboBox, QMenu
+from PyQt5.QtCore import Qt, QSize, QVariantAnimation, QPoint
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor
 import json
 from .Button import Button
@@ -16,6 +16,7 @@ class ImageToPalette(QDockWidget):
         self.setAcceptDrops(True)
         self.image_path = None
         self.palette = Palette()
+        self.recent_palettes = []  # List to store recent palettes
         self.initUI()
         self.original_bg_color = self.main_widget.palette().color(self.main_widget.backgroundRole())
 
@@ -48,12 +49,22 @@ class ImageToPalette(QDockWidget):
         self.button_load_palette = Button(icon_name='document-open', tooltip='Load Palette')
         self.button_load_palette.clicked.connect(self.load_palette)
 
+        # Dropdown for recent palettes
+        self.recent_palettes_dropdown = QComboBox(self)
+        self.recent_palettes_dropdown.setEditable(True)
+        self.recent_palettes_dropdown.lineEdit().setReadOnly(True)
+        self.recent_palettes_dropdown.lineEdit().setText("Recent Palettes")
+        self.recent_palettes_dropdown.lineEdit().setAlignment(Qt.AlignCenter)
+        self.recent_palettes_dropdown.setMaxVisibleItems(5)
+
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
         button_layout.addWidget(self.button_load_palette)
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_regenerate)
-        button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        #button_layout.addWidget(QLabel("Recent Palettes:"))
+        button_layout.addWidget(self.recent_palettes_dropdown, 1)  # Add stretch factor to expand the dropdown
+        #button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
 
         # Adding the button layout to the main layout
         main_layout.addLayout(button_layout)
@@ -72,6 +83,9 @@ class ImageToPalette(QDockWidget):
 
         # Setting the default grid with placeholder colors
         self.createDefaultGrid()
+
+        # Connect dropdown to display menu
+        self.recent_palettes_dropdown.view().pressed.connect(self.show_recent_palettes_menu)
 
     # Override sizeHint to set initial size of the docker widget
     def sizeHint(self):
@@ -111,11 +125,14 @@ class ImageToPalette(QDockWidget):
         self.palette_layout.displayColorsInGrid(placeholder_palette, selectable=False)
 
     def save_palette(self):
-        self.palette.save_palette()
+        file_name = self.palette.save_palette()
+        if file_name:
+            self.update_recent_palettes(file_name)
 
     def load_palette(self):
         file_name = self.palette.load_palette()
         if file_name:
+            self.update_recent_palettes(file_name)
             self.displayPalette()
             self.image_name_label.setText(f"{self.palette.image_name}")
             self.button_regenerate.setEnabled(True)
@@ -132,6 +149,21 @@ class ImageToPalette(QDockWidget):
             self.image_name_label.setText(f"{self.palette.image_name}")
             self.button_regenerate.setEnabled(True)
             self.button_save.setEnabled(True)
+
+    def show_recent_palettes_menu(self):
+        menu = QMenu(self)
+        for palette_path in self.recent_palettes:
+            action = menu.addAction(palette_path)
+            action.triggered.connect(lambda checked=False, path=palette_path: self.load_palette_from_file(path))
+        menu.exec(QCursor.pos())
+
+    def update_recent_palettes(self, file_name):
+        if file_name not in self.recent_palettes:
+            self.recent_palettes.insert(0, file_name)
+        if len(self.recent_palettes) > 5:
+            self.recent_palettes.pop()
+        self.recent_palettes_dropdown.clear()
+        self.recent_palettes_dropdown.addItems(["Recent Palettes"] + self.recent_palettes)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
