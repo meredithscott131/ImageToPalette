@@ -8,10 +8,11 @@ import random
 # Represents the set of colors in an image
 class Palette:
     def __init__(self):
-        self.name = "Default" # Name of the palette
-        self.cur_colors = [] # List of the current displayed colors
-        self.total_colors = [] # List of the total colors found in the image
-    
+        self.name = "Default"  # Name of the palette
+        self.cur_colors = []  # List of the current displayed colors
+        self.total_colors = []  # List of the total colors found in the image
+        self.image_name = None  # Name of the original image
+
     # Adds the given color to the current list of colors
     def add_color(self, color):
         self.cur_colors.append(color)
@@ -29,10 +30,11 @@ class Palette:
                 json.dump({
                     "name": self.name,
                     "current colors": self.cur_colors,
-                    "total colors": [(color, count) for color, count in self.total_colors]
+                    "total colors": [(color, count) for color, count in self.total_colors],
+                    "image_name": self.image_name  # Save the image name
                 }, file)
 
-    # Launches dialog to select the palette file to load into the docker  
+    # Launches dialog to select the palette file to load into the docker
     def load_palette(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(None, "Load Palette", "", "JSON Files (*.json);;All Files (*)", options=options)
@@ -42,12 +44,16 @@ class Palette:
                 self.name = data["name"]
                 self.cur_colors = data["current colors"]
                 self.total_colors = [(color, count) for color, count in data.get("total colors", [])]
+                self.image_name = data.get("image_name")  # Load the image name
+            return file_name  # Return the file name for the label update
+        return None
 
     # Collects and stores all of the most common colors in the given image
     def collectColors(self, image_path):
+        self.image_name = image_path.split('/')[-1]  # Store the image name
         image = QImage(image_path)
         image = image.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        
+
         color_counter = Counter()
         for x in range(image.width()):
             for y in range(image.height()):

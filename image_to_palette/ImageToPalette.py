@@ -1,5 +1,5 @@
 from krita import *
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel
 from PyQt5.QtCore import Qt, QSize, QVariantAnimation
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor
 from .Button import Button
@@ -42,7 +42,6 @@ class ImageToPalette(QDockWidget):
         self.button_save.clicked.connect(self.save_palette)
         self.button_save.setEnabled(False)
 
-
         # Creating "Load Palette" button
         self.button_load_palette = Button(icon_name='document-open', tooltip='Load Palette')
         self.button_load_palette.clicked.connect(self.load_palette)
@@ -53,8 +52,13 @@ class ImageToPalette(QDockWidget):
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_regenerate)
         button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        
+
+        # Adding the button layout to the main layout
         main_layout.addLayout(button_layout)
+
+        # Creating a label to display the loaded image's name
+        self.image_name_label = QLabel("No image loaded")
+        main_layout.addWidget(self.image_name_label)
 
         # Creating a grid layout for the color palette
         self.palette_layout = PaletteGrid()
@@ -69,7 +73,7 @@ class ImageToPalette(QDockWidget):
 
         # Store the original background color
         self.original_bg_color = self.main_widget.palette().color(self.main_widget.backgroundRole())
-    
+
     # Override sizeHint to set initial size of the docker widget
     def sizeHint(self):
         return QSize(300, 400)
@@ -81,13 +85,14 @@ class ImageToPalette(QDockWidget):
         if file_path:
             self.image_path = file_path
             self.createColorPalette()
+            self.image_name_label.setText(f"{file_path.split('/')[-1]}")
 
     # Generating a color palette from the set image path
     def createColorPalette(self):
         self.palette.collectColors(self.image_path)
         self.palette.generatePalette()
         self.displayPalette()
-        self.button_regenerate.setEnabled(True) 
+        self.button_regenerate.setEnabled(True)
         self.button_save.setEnabled(True)
 
     # Display the palette in the grid layout
@@ -110,10 +115,12 @@ class ImageToPalette(QDockWidget):
         self.palette.save_palette()
 
     def load_palette(self):
-        self.palette.load_palette()
-        self.displayPalette()
-        self.button_regenerate.setEnabled(True)
-        self.button_save.setEnabled(True)
+        file_name = self.palette.load_palette()
+        if file_name:
+            self.displayPalette()
+            self.image_name_label.setText(f"{self.palette.image_name}")
+            self.button_regenerate.setEnabled(True)
+            self.button_save.setEnabled(True)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
@@ -124,10 +131,10 @@ class ImageToPalette(QDockWidget):
                     event.acceptProposedAction()
                     return
         event.ignore()
-    
+
     def dragLeaveEvent(self, event: QDragLeaveEvent):
         self.animateBackgroundColor(self.original_bg_color)  # Default color
-    
+
     def dropEvent(self, event: QDropEvent):
         urls = event.mimeData().urls()
         if urls:
@@ -135,6 +142,7 @@ class ImageToPalette(QDockWidget):
                 if url.isLocalFile() and url.toLocalFile().lower().endswith(('.png', '.jpg', '.bmp')):
                     self.image_path = url.toLocalFile()
                     self.createColorPalette()
+                    self.image_name_label.setText(f"{self.image_path.split('/')[-1]}")
                     event.acceptProposedAction()
                     self.animateBackgroundColor(self.original_bg_color)  # Reset color after drop
                     return
@@ -152,4 +160,4 @@ class ImageToPalette(QDockWidget):
         palette = self.main_widget.palette()
         palette.setColor(self.main_widget.backgroundRole(), color)
         self.main_widget.setPalette(palette)
-        self.main_widget.setAutoFillBackground(True)
+        self
