@@ -1,13 +1,17 @@
 from krita import *
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel, QComboBox, QMenu
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel, QMenu, QSizePolicy, QAction
 from PyQt5.QtCore import Qt, QSize, QVariantAnimation, QPoint
-from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor
+from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor, QCursor
 import json
+import os
 from .Button import Button
 from .PaletteGrid import PaletteGrid
 from .Palette import Palette
 
 DOCKER_TITLE = 'Image to Palette'
+
+# Path to store recent palettes
+RECENT_PALETTES_FILE = os.path.join(os.path.expanduser('~'), '.krita_recent_palettes.json')
 
 class ImageToPalette(QDockWidget):
     def __init__(self):
@@ -16,7 +20,7 @@ class ImageToPalette(QDockWidget):
         self.setAcceptDrops(True)
         self.image_path = None
         self.palette = Palette()
-        self.recent_palettes = []  # List to store recent palettes
+        self.recent_palettes = self.load_recent_palettes()  # Load recent palettes from file
         self.initUI()
         self.original_bg_color = self.main_widget.palette().color(self.main_widget.backgroundRole())
 
@@ -50,21 +54,21 @@ class ImageToPalette(QDockWidget):
         self.button_load_palette.clicked.connect(self.load_palette)
 
         # Dropdown for recent palettes
-        self.recent_palettes_dropdown = QComboBox(self)
-        self.recent_palettes_dropdown.setEditable(True)
-        self.recent_palettes_dropdown.lineEdit().setReadOnly(True)
-        self.recent_palettes_dropdown.lineEdit().setText("Recent Palettes")
-        self.recent_palettes_dropdown.lineEdit().setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.recent_palettes_dropdown.setMaxVisibleItems(5)
+        self.recent_palettes_button = QPushButton("Recent Palettes")
+        self.recent_palettes_button.setStyleSheet("text-align: left; padding-left: 10px; padding-right: 20px;")  # Adjust left padding
+        self.recent_palettes_menu = QMenu(self)
+        self.recent_palettes_button.setMenu(self.recent_palettes_menu)
+        self.update_recent_palettes_menu()
+
+        # Ensure the menu expands to match the docker's width
+        self.recent_palettes_menu.aboutToShow.connect(self.update_menu_width)
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
         button_layout.addWidget(self.button_load_palette)
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_regenerate)
-        #button_layout.addWidget(QLabel("Recent Palettes:"))
-        button_layout.addWidget(self.recent_palettes_dropdown, 1)  # Add stretch factor to expand the dropdown
-        #button_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        button_layout.addWidget(self.recent_palettes_button)  # Add stretch factor to expand the dropdown
 
         # Adding the button layout to the main layout
         main_layout.addLayout(button_layout)
@@ -84,12 +88,9 @@ class ImageToPalette(QDockWidget):
         # Setting the default grid with placeholder colors
         self.createDefaultGrid()
 
-        # Connect dropdown to display menu
-        self.recent_palettes_dropdown.view().pressed.connect(self.show_recent_palettes_menu)
-
     # Override sizeHint to set initial size of the docker widget
     def sizeHint(self):
-        return QSize(300, 400)
+        return QSize(300, 200)
 
     # Open file dialog to select image
     def openFile(self):
@@ -150,20 +151,34 @@ class ImageToPalette(QDockWidget):
             self.button_regenerate.setEnabled(True)
             self.button_save.setEnabled(True)
 
-    def show_recent_palettes_menu(self):
-        menu = QMenu(self)
+    def update_recent_palettes_menu(self):
+        self.recent_palettes_menu.clear()
         for palette_path in self.recent_palettes:
-            action = menu.addAction(palette_path)
+            action = QAction(palette_path, self)
             action.triggered.connect(lambda checked=False, path=palette_path: self.load_palette_from_file(path))
-        menu.exec(QCursor.pos())
+            self.recent_palettes_menu.addAction(action)
+
+    def update_menu_width(self):
+        self.recent_palettes_menu.setMinimumWidth(self.main_widget.width())
 
     def update_recent_palettes(self, file_name):
         if file_name not in self.recent_palettes:
             self.recent_palettes.insert(0, file_name)
         if len(self.recent_palettes) > 5:
             self.recent_palettes.pop()
-        self.recent_palettes_dropdown.clear()
-        self.recent_palettes_dropdown.addItems(["Recent Palettes"] + self.recent_palettes)
+        self.update_recent_palettes_menu()
+        self.save_recent_palettes()  # Save recent palettes to file
+
+    def save_recent_palettes(self):
+        with open(RECENT_PALETTES_FILE, 'w') as file:
+            json.dump(self.recent_palettes, file)
+
+    def load_recent_palettes(self):
+        try:
+            with open(RECENT_PALETTES_FILE, 'r') as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
