@@ -1,5 +1,5 @@
 from krita import *
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel, QMenu, QAction
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QDockWidget, QHBoxLayout, QFileDialog, QLabel, QComboBox, QSizePolicy
 from PyQt5.QtCore import Qt, QSize, QVariantAnimation
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QColor
 import json
@@ -54,21 +54,22 @@ class ImageToPalette(QDockWidget):
         self.button_load_palette.clicked.connect(self.load_palette)
 
         # Dropdown for recent palettes
-        self.recent_palettes_button = QPushButton("Recent Palettes")
-        self.recent_palettes_button.setStyleSheet("text-align: left; padding-left: 10px; padding-right: 20px;")  # Adjust left padding
-        self.recent_palettes_menu = QMenu(self)
-        self.recent_palettes_button.setMenu(self.recent_palettes_menu)
-        self.update_recent_palettes_menu()
+        self.recent_palettes_combo = QComboBox()
+        self.recent_palettes_combo.setPlaceholderText("Recent Palettes")
+        self.recent_palettes_combo.activated.connect(self.load_selected_recent_palette)
+        self.update_recent_palettes_combo()
 
-        # Ensure the menu expands to match the button's width
-        self.recent_palettes_menu.aboutToShow.connect(self.update_menu_width)
+        # Set size policy to ensure it can shrink
+        self.recent_palettes_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        # Set minimum size for the combo box
+        self.recent_palettes_combo.setMinimumSize(150, 30)  # Adjust width and height as needed
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
         button_layout.addWidget(self.button_load_palette)
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_regenerate)
-        button_layout.addWidget(self.recent_palettes_button)
+        button_layout.addWidget(self.recent_palettes_combo)
 
         # Adding the button layout to the main layout
         main_layout.addLayout(button_layout)
@@ -151,22 +152,23 @@ class ImageToPalette(QDockWidget):
             self.button_regenerate.setEnabled(True)
             self.button_save.setEnabled(True)
 
-    def update_recent_palettes_menu(self):
-        self.recent_palettes_menu.clear()
+    def update_recent_palettes_combo(self):
+        self.recent_palettes_combo.clear()
+        self.recent_palettes_combo.addItem("Recent Palettes")
         for palette_path in self.recent_palettes:
-            action = QAction(palette_path, self)
-            action.triggered.connect(lambda checked=False, path=palette_path: self.load_palette_from_file(path))
-            self.recent_palettes_menu.addAction(action)
+            self.recent_palettes_combo.addItem(palette_path)
 
-    def update_menu_width(self):
-        self.recent_palettes_menu.setFixedWidth(self.recent_palettes_button.width())
+    def load_selected_recent_palette(self, index):
+        if index > 0:  # Ignore the first placeholder item
+            palette_path = self.recent_palettes[index - 1]
+            self.load_palette_from_file(palette_path)
 
     def update_recent_palettes(self, file_name):
         if file_name not in self.recent_palettes:
             self.recent_palettes.insert(0, file_name)
         if len(self.recent_palettes) > 5:
             self.recent_palettes.pop()
-        self.update_recent_palettes_menu()
+        self.update_recent_palettes_combo()
         self.save_recent_palettes()  # Save recent palettes to file
 
     def save_recent_palettes(self):
@@ -182,7 +184,6 @@ class ImageToPalette(QDockWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.update_menu_width()
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
