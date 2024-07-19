@@ -55,14 +55,18 @@ class ImageToPalette(QDockWidget):
 
         # Dropdown for recent palettes
         self.recent_palettes_combo = QComboBox()
+        self.recent_palettes_combo.setStyleSheet('''*    
+                        QComboBox QAbstractItemView 
+                            {
+                            min-width: 150px;
+                            }
+                        ''')
         self.recent_palettes_combo.setPlaceholderText("Recent Palettes")
         self.recent_palettes_combo.activated.connect(self.load_selected_recent_palette)
         self.update_recent_palettes_combo()
 
         # Set size policy to ensure it can shrink
         self.recent_palettes_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        # Set minimum size for the combo box
-        self.recent_palettes_combo.setMinimumSize(150, 30)  # Adjust width and height as needed
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
@@ -156,12 +160,24 @@ class ImageToPalette(QDockWidget):
         self.recent_palettes_combo.clear()
         self.recent_palettes_combo.addItem("Recent Palettes")
         for palette_path in self.recent_palettes:
-            self.recent_palettes_combo.addItem(palette_path)
+            file_name = palette_path.split('/')[-1]  # Extract the file name from the path
+            self.recent_palettes_combo.addItem(file_name)
+        self.recent_palettes_combo.setCurrentIndex(0)
+        self.recent_palettes_combo.setEditable(True)
+        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
+        self.recent_palettes_combo.setEditable(False)
+
 
     def load_selected_recent_palette(self, index):
         if index > 0:  # Ignore the first placeholder item
             palette_path = self.recent_palettes[index - 1]
             self.load_palette_from_file(palette_path)
+        # Reset the displayed text back to "Recent Palettes"
+        self.recent_palettes_combo.setCurrentIndex(0)
+        self.recent_palettes_combo.setEditable(True)
+        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
+        self.recent_palettes_combo.setEditable(False)
+
 
     def update_recent_palettes(self, file_name):
         if file_name not in self.recent_palettes:
