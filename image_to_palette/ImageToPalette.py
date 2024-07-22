@@ -32,7 +32,7 @@ class ImageToPalette(QDockWidget):
 
         # Creating a horizontal layout for buttons
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(5)  # Set spacing between buttons
+        button_layout.setSpacing(0)  # Set spacing between buttons
         button_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
 
         # Creating "Load Image" button
@@ -55,13 +55,16 @@ class ImageToPalette(QDockWidget):
 
         # Dropdown for recent palettes
         self.recent_palettes_combo = QComboBox()
+        self.recent_palettes_combo.setEditable(True)
+        self.recent_palettes_combo.lineEdit().setReadOnly(True)
+        self.recent_palettes_combo.lineEdit().setAlignment(Qt.AlignLeft) 
         self.recent_palettes_combo.setStyleSheet('''*    
                         QComboBox QAbstractItemView 
                             {
                             min-width: 150px;
                             }
                         ''')
-        self.recent_palettes_combo.setPlaceholderText("Recent Palettes")
+        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
         self.recent_palettes_combo.activated.connect(self.load_selected_recent_palette)
         self.update_recent_palettes_combo()
 
@@ -100,7 +103,9 @@ class ImageToPalette(QDockWidget):
     # Open file dialog to select image
     def openFile(self):
         options = QFileDialog.Options()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Image", "", "Image Files (*.png *.jpg *.bmp);;All Files (*)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Image",
+                                                   "", "Image Files (*.png *.jpg *.bmp);;All Files (*)",
+                                                   options=options)
         if file_path:
             self.image_path = file_path
             self.createColorPalette()
@@ -156,36 +161,33 @@ class ImageToPalette(QDockWidget):
             self.button_regenerate.setEnabled(True)
             self.button_save.setEnabled(True)
 
-    def update_recent_palettes_combo(self):
-        self.recent_palettes_combo.clear()
-        self.recent_palettes_combo.addItem("Recent Palettes")
-        for palette_path in self.recent_palettes:
-            file_name = palette_path.split('/')[-1]  # Extract the file name from the path
-            self.recent_palettes_combo.addItem(file_name)
-        self.recent_palettes_combo.setCurrentIndex(0)
-        self.recent_palettes_combo.setEditable(True)
-        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
-        self.recent_palettes_combo.setEditable(False)
-
-
     def load_selected_recent_palette(self, index):
-        if index > 0:  # Ignore the first placeholder item
-            palette_path = self.recent_palettes[index - 1]
+        if index > 0:
+            palette_path = self.recent_palettes.pop(index)
             self.load_palette_from_file(palette_path)
-        # Reset the displayed text back to "Recent Palettes"
-        self.recent_palettes_combo.setCurrentIndex(0)
-        self.recent_palettes_combo.setEditable(True)
-        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
-        self.recent_palettes_combo.setEditable(False)
+            
+            # Insert the selected item at the top of the list
+            self.recent_palettes.insert(0, palette_path)
 
+            # Update the combo box with the new order
+            self.update_recent_palettes_combo()
 
     def update_recent_palettes(self, file_name):
-        if file_name not in self.recent_palettes:
-            self.recent_palettes.insert(0, file_name)
+        if file_name in self.recent_palettes:
+            self.recent_palettes.remove(file_name)
+        self.recent_palettes.insert(0, file_name)
         if len(self.recent_palettes) > 5:
             self.recent_palettes.pop()
         self.update_recent_palettes_combo()
-        self.save_recent_palettes()  # Save recent palettes to file
+        self.save_recent_palettes()
+    
+    def update_recent_palettes_combo(self):
+        self.recent_palettes_combo.clear()
+        for palette_path in self.recent_palettes:
+            file_name = os.path.basename(palette_path)
+            self.recent_palettes_combo.addItem(file_name)
+        #self.recent_palettes_combo.setCurrentIndex(0)
+        self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
 
     def save_recent_palettes(self):
         with open(RECENT_PALETTES_FILE, 'w') as file:
@@ -212,7 +214,7 @@ class ImageToPalette(QDockWidget):
         event.ignore()
 
     def dragLeaveEvent(self, event: QDragLeaveEvent):
-        self.animateBackgroundColor(self.original_bg_color)  # Default color
+        self.animateBackgroundColor(self.original_bg_color)
 
     def dropEvent(self, event: QDropEvent):
         urls = event.mimeData().urls()
@@ -225,12 +227,13 @@ class ImageToPalette(QDockWidget):
                         self.createColorPalette()
                         self.image_name_label.setText(f"{self.image_path.split('/')[-1]}")
                         event.acceptProposedAction()
-                        self.animateBackgroundColor(self.original_bg_color)  # Reset color after drop
+                        self.animateBackgroundColor(self.original_bg_color)
                         return
                     elif file_path.endswith('.json'):
                         self.load_palette_from_file(file_path)
+                        self.update_recent_palettes(file_path)
                         event.acceptProposedAction()
-                        self.animateBackgroundColor(self.original_bg_color)  # Reset color after drop
+                        self.animateBackgroundColor(self.original_bg_color)
                         return
         event.ignore()
 
