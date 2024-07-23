@@ -57,19 +57,15 @@ class ImageToPalette(QDockWidget):
         self.recent_palettes_combo = QComboBox()
         self.recent_palettes_combo.setEditable(True)
         self.recent_palettes_combo.lineEdit().setReadOnly(True)
-        self.recent_palettes_combo.lineEdit().setAlignment(Qt.AlignLeft) 
-        self.recent_palettes_combo.setStyleSheet('''*    
-                        QComboBox QAbstractItemView 
-                            {
-                            min-width: 150px;
-                            }
-                        ''')
+        self.recent_palettes_combo.lineEdit().setAlignment(Qt.AlignLeft)
+        self.recent_palettes_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        # Set elide mode for the combobox items
+        self.recent_palettes_combo.view().setTextElideMode(Qt.ElideRight)
+
         self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
         self.recent_palettes_combo.activated.connect(self.load_selected_recent_palette)
         self.update_recent_palettes_combo()
-
-        # Set size policy to ensure it can shrink
-        self.recent_palettes_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Adding buttons to the button layout
         button_layout.addWidget(self.button_load)
@@ -183,10 +179,12 @@ class ImageToPalette(QDockWidget):
     
     def update_recent_palettes_combo(self):
         self.recent_palettes_combo.clear()
+        font_metrics = self.recent_palettes_combo.fontMetrics()
+        combo_width = self.recent_palettes_combo.width()
         for palette_path in self.recent_palettes:
             file_name = os.path.basename(palette_path)
-            self.recent_palettes_combo.addItem(file_name)
-        #self.recent_palettes_combo.setCurrentIndex(0)
+            elided_text = font_metrics.elidedText(file_name, Qt.ElideRight, combo_width - 20)  # Adjust width as needed
+            self.recent_palettes_combo.addItem(elided_text)
         self.recent_palettes_combo.lineEdit().setText("Recent Palettes")
 
     def save_recent_palettes(self):
@@ -202,6 +200,7 @@ class ImageToPalette(QDockWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.update_recent_palettes_combo()
 
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():

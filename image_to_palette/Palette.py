@@ -33,6 +33,8 @@ class Palette:
                     "total colors": [(color, count) for color, count in self.total_colors],
                     "image_name": self.image_name  # Save the image name
                 }, file)
+            return file_name  # Return the file name for the recent palettes list
+        return None
 
     # Launches dialog to select the palette file to load into the docker
     def load_palette(self):
