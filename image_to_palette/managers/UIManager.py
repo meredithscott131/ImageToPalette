@@ -177,7 +177,7 @@ class UIManager:
         if urls:
             for url in urls:
                 if url.isLocalFile():
-                    file_path = url.toLocalFile().lower()
+                    file_path = url.toLocalFile()
                     
                     # User drops an image file to create a new palette
                     if file_path.endswith(('.png', '.jpg', '.bmp')):
@@ -189,7 +189,7 @@ class UIManager:
                         return
                     # User drops a pre-existing palette json file
                     elif file_path.endswith('.json'):
-                        self.parent.file_manager.load_palette(file_path)
+                        self.parent.file_manager.load_palette(file_path.lower())
                         event.acceptProposedAction()
                         self.animate_background_color(self.parent.original_bg_color)
                         return
