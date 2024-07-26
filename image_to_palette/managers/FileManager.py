@@ -50,7 +50,7 @@ class FileManager:
         with open(file_name, 'r') as file:
             palette_data = json.load(file)
         
-        # Updates and displays the palette from the data
+        # Initializes and displays the palette from the data
         self.parent.palette.from_json(palette_data)
         self.parent.palette_manager.display_palette()
         

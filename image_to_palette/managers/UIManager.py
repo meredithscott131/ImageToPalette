@@ -182,9 +182,7 @@ class UIManager:
                     # User drops an image file to create a new palette
                     if file_path.endswith(('.png', '.jpg', '.bmp')):
                         try:
-                            self.parent.image_path = file_path
-                            self.parent.palette_manager.create_color_palette()
-                            self.parent.image_name_label.setText(f"{self.parent.image_path.split('/')[-1]}")
+                            self.file_manager.open_image(file_path)
                             event.acceptProposedAction()
                             self.animate_background_color(self.parent.original_bg_color)
                             return

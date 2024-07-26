@@ -1,10 +1,3 @@
-import json
-from collections import Counter
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtGui import QImage
-from PyQt5.QtCore import Qt
-import random
-
 # Represents a set of dominant colors in an image
 class Palette:
     def __init__(self):
@@ -19,36 +12,7 @@ class Palette:
     # Clears the current list of colors
     def clear_colors(self):
         self.cur_colors = []
-    
-    # Collects and stores all of the most common colors in the given image
-    def collectColors(self, image_path):
-        self.image_name = image_path.split('/')[-1]
-        image = QImage(image_path)
-        image = image.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
-        color_counter = Counter()
-        for x in range(image.width()):
-            for y in range(image.height()):
-                color = image.pixelColor(x, y).rgb()
-                color_counter[color] += 1
-
-        most_common_colors = color_counter.most_common()
-        random.shuffle(most_common_colors)
-
-        self.total_colors = most_common_colors
-    
-    # Shuffles the current set of most common colors and sets the current set of displayed colors
-    def generatePalette(self):
-        random.shuffle(self.total_colors)
-        num_colors = 15
-        step = len(self.total_colors) // num_colors
-        palette_colors = [self.total_colors[i * step][0] for i in range(num_colors)]
-
-        self.clear_colors()
-
-        for color in palette_colors:
-            self.add_color(f'#{color:06x}')
-    
     # Initializes the palette from a json file
     def from_json(self, data):
         self.image_name = data.get("image_name", "")
