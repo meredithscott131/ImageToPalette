@@ -51,7 +51,7 @@ class FileManager:
             palette_data = json.load(file)
         
         # Updates and displays the palette from the data
-        self.parent.palette.from_dict(palette_data)
+        self.parent.palette.from_json(palette_data)
         self.parent.palette_manager.display_palette()
         
         # Get and update the origin image name of the palette
@@ -85,6 +85,6 @@ class FileManager:
     # Saves the current palette to a json file
     def save_palette(self, file_name):
         with open(file_name, 'w') as file:
-            json.dump(self.parent.palette.to_dict(), file)
+            json.dump(self.parent.palette.to_json(), file)
         
         self.parent.recent_palettes_manager.update_recent_palettes(file_name)
