@@ -189,7 +189,7 @@ class UIManager:
                         return
                     # User drops a pre-existing palette json file
                     elif file_path.endswith('.json'):
-                        self.parent.file_manager.load_palette(file_path.lower())
+                        self.parent.file_manager.load_palette(file_path)
                         event.acceptProposedAction()
                         self.animate_background_color(self.parent.original_bg_color)
                         return

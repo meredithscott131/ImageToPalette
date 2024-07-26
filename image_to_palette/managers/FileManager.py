@@ -25,7 +25,7 @@ class FileManager:
         
         if file_name:
             try:
-                self.open_file(file_name.lower())
+                self.open_file(file_name)
             except Exception as e:
                 self.show_error_popup("Error Opening File", f"An error occurred while opening the file: {e}")
     
@@ -47,7 +47,7 @@ class FileManager:
         
         if file_name:
             try:
-                self.load_palette(file_name.lower())
+                self.load_palette(file_name)
             except Exception as e:
                 self.show_error_popup("Error Loading File", f"An error occurred while loading the file: {e}")
 
@@ -84,7 +84,7 @@ class FileManager:
             if not file_name.lower().endswith('.json'):
                 file_name += '.json'
             try:
-                self.save_palette(file_name.lower())
+                self.save_palette(file_name)
             except Exception as e:
                 self.show_error_popup("Error Saving File", f"An error occurred while saving the file: {e}")
 

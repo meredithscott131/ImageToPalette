@@ -62,38 +62,3 @@ class Palette:
             "total_colors": [(color, count) for color, count in self.total_colors],
             "image_name": self.image_name
         }
-
-    # Launches dialog to select the location of the palette json file
-    # Returns the created file path for the palette
-    def save_palette(self):
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getSaveFileName(None, "Save Palette", "",
-                                                   "JSON Files (*.json);;All Files (*)", options=options)
-        
-        # Transfers palette information to json file format
-        if file_name:
-            with open(file_name, 'w') as file:
-                json.dump({
-                    "current_colors": self.cur_colors,
-                    "total_colors": [(color, count) for color, count in self.total_colors],
-                    "image_name": self.image_name  # Save the image name
-                }, file)
-            return file_name
-        
-        return None
-
-    # Launches dialog to select the palette file to load into the docker
-    def load_palette(self):
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(None, "Load Palette", "",
-                                                   "JSON Files (*.json);;All Files (*)", options=options)
-        
-        # Transfers palette information from json file format
-        if file_name:
-            with open(file_name, 'r') as file:
-                data = json.load(file)
-                self.cur_colors = data["current_colors"]
-                self.total_colors = [(color, count) for color, count in data.get("total colors", [])]
-                self.image_name = data.get("image_name")
-            return file_name
-        return None
