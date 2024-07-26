@@ -53,7 +53,7 @@ class Palette:
     def from_dict(self, data):
         self.image_name = data.get("image_name", "")
         self.cur_colors = data.get("current_colors", [])
-        self.total_colors = [(color, count) for color, count in data.get("total colors", [])]
+        self.total_colors = [(color, count) for color, count in data.get("total_colors", [])]
     
     # Converts the palette to a dictionary
     def to_dict(self):

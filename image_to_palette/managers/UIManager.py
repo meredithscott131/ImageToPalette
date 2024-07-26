@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QComboBox, QLabel, QSizePolicy, QPushButton, QGridLayout
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QComboBox, QLabel, QSizePolicy, QPushButton, QGridLayout,  QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt, QVariantAnimation
 from PyQt5.QtGui import QColor, QDragEnterEvent, QDropEvent
 from krita import ManagedColor, Krita
@@ -105,7 +105,7 @@ class UIManager:
 
         # Button for loading a new palette from an image
         self.parent.button_load = self.create_button('folder-pictures', 'Create Palette from Image',
-                                                     self.parent.file_manager.open_file_dialog)
+                                                     self.parent.file_manager.open_image_dialog)
         
         # Button for loading a pre-existing palette from a palette json file
         self.parent.button_load_palette = self.create_button('document-open', 'Load Palette',
@@ -181,12 +181,15 @@ class UIManager:
                     
                     # User drops an image file to create a new palette
                     if file_path.endswith(('.png', '.jpg', '.bmp')):
-                        self.parent.image_path = file_path
-                        self.parent.palette_manager.create_color_palette()
-                        self.parent.image_name_label.setText(f"{self.parent.image_path.split('/')[-1]}")
-                        event.acceptProposedAction()
-                        self.animate_background_color(self.parent.original_bg_color)
-                        return
+                        try:
+                            self.parent.image_path = file_path
+                            self.parent.palette_manager.create_color_palette()
+                            self.parent.image_name_label.setText(f"{self.parent.image_path.split('/')[-1]}")
+                            event.acceptProposedAction()
+                            self.animate_background_color(self.parent.original_bg_color)
+                            return
+                        except Exception as e:
+                            self.show_error_popup("Error Loading File", f"An error occurred while loading the file: {e}")
                     # User drops a pre-existing palette json file
                     elif file_path.endswith('.json'):
                         self.parent.file_manager.load_palette(file_path)
@@ -212,3 +215,11 @@ class UIManager:
         palette.setColor(self.parent.main_widget.backgroundRole(), color)
         self.parent.main_widget.setPalette(palette)
         self.parent.main_widget.setAutoFillBackground(True)
+    
+    # Displays an error popup with the given title and message
+    def show_error_popup(self, title, message):
+        error_dialog = QMessageBox()
+        error_dialog.setIcon(QMessageBox.Critical)
+        error_dialog.setWindowTitle(title)
+        error_dialog.setText(message)
+        error_dialog.exec_()

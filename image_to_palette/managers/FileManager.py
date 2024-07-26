@@ -1,20 +1,14 @@
 import json
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from .UIManager import UIManager
 
 class FileManager:
     def __init__(self, parent):
         self.parent = parent
-
-    # Displays an error popup with the given title and message
-    def show_error_popup(self, title, message):
-        error_dialog = QMessageBox()
-        error_dialog.setIcon(QMessageBox.Critical)
-        error_dialog.setWindowTitle(title)
-        error_dialog.setText(message)
-        error_dialog.exec_()
+        self.ui_manager = UIManager(self)
 
     # Opens a file dialog to select an image file
-    def open_file_dialog(self):
+    def open_image_dialog(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(
             self.parent,
@@ -25,12 +19,12 @@ class FileManager:
         
         if file_name:
             try:
-                self.open_file(file_name)
+                self.open_image(file_name)
             except Exception as e:
-                self.show_error_popup("Error Opening File", f"An error occurred while opening the file: {e}")
+                self.ui_manager.show_error_popup("Error Opening File", f"An error occurred while opening the file: {e}")
     
     # Opens a new palette from the loaded image
-    def open_file(self, file_name):
+    def open_image(self, file_name):
         self.parent.image_path = file_name
         self.parent.palette_manager.create_color_palette()
         self.parent.image_name_label.setText(f"{self.parent.image_path.split('/')[-1]}")
@@ -49,7 +43,7 @@ class FileManager:
             try:
                 self.load_palette(file_name)
             except Exception as e:
-                self.show_error_popup("Error Loading File", f"An error occurred while loading the file: {e}")
+                self.ui_manager.show_error_popup("Error Loading File", f"An error occurred while loading the file: {e}")
 
     # Loads a palette from a file and updates the UI
     def load_palette(self, file_name):
@@ -86,7 +80,7 @@ class FileManager:
             try:
                 self.save_palette(file_name)
             except Exception as e:
-                self.show_error_popup("Error Saving File", f"An error occurred while saving the file: {e}")
+                self.ui_manager.show_error_popup("Error Saving File", f"An error occurred while saving the file: {e}")
 
     # Saves the current palette to a json file
     def save_palette(self, file_name):
