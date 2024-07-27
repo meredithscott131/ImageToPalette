@@ -1,5 +1,5 @@
 import json
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog
 from .UIManager import UIManager
 
 class FileManager:

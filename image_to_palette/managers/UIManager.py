@@ -87,6 +87,7 @@ class UIManager:
 
         # Label displaying the origin image name of the palette
         self.parent.image_name_label = QLabel("No palette loaded")
+        self.parent.image_name_label.setContentsMargins(5, 5, 5, 5)
         main_layout.addWidget(self.parent.image_name_label)
 
         # 15-color palette grid
@@ -182,22 +183,30 @@ class UIManager:
                     # User drops an image file to create a new palette
                     if file_path.endswith(('.png', '.jpg', '.bmp')):
                         try:
-                            self.file_manager.open_image(file_path)
+                            self.parent.file_manager.open_image(file_path)
                             event.acceptProposedAction()
                             self.animate_background_color(self.parent.original_bg_color)
                             return
                         except Exception as e:
                             self.show_error_popup("Error Loading File", f"An error occurred while loading the file: {e}")
+                            self.set_background_color(self.parent.original_bg_color)  # Ensure background color is reset
+                            return
                     # User drops a pre-existing palette json file
                     elif file_path.endswith('.json'):
-                        self.parent.file_manager.load_palette(file_path)
-                        event.acceptProposedAction()
-                        self.animate_background_color(self.parent.original_bg_color)
-                        return
-                    
-        # Invalid file type or path so ignore
-        event.ignore()
+                        try:
+                            self.parent.file_manager.load_palette(file_path)
+                            event.acceptProposedAction()
+                            self.animate_background_color(self.parent.original_bg_color)
+                            return
+                        except Exception as e:
+                            self.show_error_popup("Error Loading Palette", f"An error occurred while loading the palette: {e}")
+                            self.set_background_color(self.parent.original_bg_color)  # Ensure background color is reset
+                            return
 
+        # Invalid file type or path so ignore
+        self.set_background_color(self.parent.original_bg_color)
+        event.ignore()
+        
     # Animates the background color of the docker to indicate drag-and-drop
     def animate_background_color(self, color):
         self.animation = QVariantAnimation(self.parent)
@@ -216,7 +225,7 @@ class UIManager:
     
     # Displays an error popup with the given title and message
     def show_error_popup(self, title, message):
-        error_dialog = QMessageBox()
+        error_dialog = QMessageBox(self.parent)
         error_dialog.setIcon(QMessageBox.Critical)
         error_dialog.setWindowTitle(title)
         error_dialog.setText(message)
