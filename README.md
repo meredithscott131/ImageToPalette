@@ -3,23 +3,6 @@ A [Krita](https://krita.org/en/) docker plugin for quickly generating color pale
 
 Inspiration: Procreate's [Palette Capture](https://help.procreate.com/procreate/handbook/colors/colors-palettes) feature and [PaletteGenerator](https://github.com/kaichi1342/PaletteGenerator?tab=readme-ov-file).
 
-## Breakdown
-<img src="screenshots\breakdown.png" width="250"></img>
-
-| # | Feature | Description |
-|---|---------|-------------|
-| 1 | Create Palette From Image | Button to load a new palette from an image file. |
-| 2 | Load Palette | Button to load a palette JSON file.
-| 3 | Save Palette | Button to save the current palette data as a JSON file.
-| 4 | Regenerate Palette | Button that regenerates the color palette from the current loaded image. |
-| 5 | Recent Palette History | Drop-down that lists the 5 most recently opened palette JSON files to select from.
-| 6 | Source Image Name | Name of the loaded palette's source image.
-| 7 | Generated Color Output | Grid of the selectable colors pulled from the image. |
-
-## Demo
-<video src="screenshots\demo.mp4" controls></video>
-v1.1.0
-
 ## Setup
 
 ### Download
@@ -36,10 +19,6 @@ v1.1.0
 
 ### Tested Platforms
 Krita 5.2.3
-
-### Release Log
-07/04/2024 **v1.0.0**
-- First released version.
 
 07/26/2024 **v1.1.0**
 - Added saving and JSON palette files.
