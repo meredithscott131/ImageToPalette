@@ -7,10 +7,13 @@ from .model.Palette import Palette
 import os
 
 #---------------------------------------------------------#
-#  Image to Palette - Copyright (c) 2024 - Meredith Scott #
-# --------------------------------------------------------#
-#  A Krita docker plugin that allows you to quickly       #
-#  generate color palettes from images.                   #
+# Image to Palette - Copyright (c) 2024 - Meredith Scott  #
+#---------------------------------------------------------#
+# Image to Palette is shared under the GNU General        #
+# Public License (GPL), version 3.                        #
+#---------------------------------------------------------#
+# A Krita docker plugin that allows you to quickly        #
+# generate color palettes from images.                    #
 #---------------------------------------------------------#
 class ImageToPalette(QDockWidget):
     def __init__(self):

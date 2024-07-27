@@ -29,7 +29,7 @@ class FileManager:
         self.parent.palette_manager.create_color_palette()
         self.parent.image_name_label.setText(f"{self.parent.image_path.split('/')[-1]}")
 
-    # Loads a file dialog to load a palette json file
+    # Opens a file dialog to load a palette json file
     def load_palette_dialog(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(

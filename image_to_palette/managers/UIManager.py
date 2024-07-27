@@ -161,7 +161,6 @@ class UIManager:
         self.parent.palette_layout.displayColorsInGrid(placeholder_palette, selectable=False)
 
     # Handles the event where the user drags an image or palette json file over the docker
-    # Animates a background fade
     def handle_drag_enter(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
             urls = event.mimeData().urls()
