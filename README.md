@@ -17,7 +17,6 @@ Inspiration: Procreate's [Palette Capture](https://help.procreate.com/procreate/
 
 ## Demo
 https://github.com/user-attachments/assets/a712bc12-4d1d-4987-a2a8-35bd85d74220 
-v1.1.0
 
 ## Setup
 
