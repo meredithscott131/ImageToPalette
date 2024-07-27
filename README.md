@@ -16,7 +16,7 @@ Inspiration: Procreate's [Palette Capture](https://help.procreate.com/procreate/
 | 7 | Generated Color Output | Grid of the selectable colors pulled from the image. |
 
 ## Demo
-<video src="screenshots\demo.mp4" controls></video>
+https://github.com/user-attachments/assets/a712bc12-4d1d-4987-a2a8-35bd85d74220 
 v1.1.0
 
 ## Setup
@@ -35,6 +35,10 @@ v1.1.0
 
 ### Tested Platforms
 Krita 5.2.3
+
+### Release Log
+07/04/2024 **v1.0.0**
+- First released version.
 
 07/26/2024 **v1.1.0**
 - Added saving and JSON palette files.
