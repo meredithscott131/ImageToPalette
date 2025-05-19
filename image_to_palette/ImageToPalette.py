@@ -43,7 +43,7 @@ class ImageToPalette(QDockWidget):
 
     # Sets recommended size of the docker    
     def sizeHint(self):
-        return QSize(300, 200)
+        return QSize(300, 100)
 
     # Handles the drag enter event
     def dragEnterEvent(self, event: QDragEnterEvent):

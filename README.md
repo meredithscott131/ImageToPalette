@@ -45,5 +45,9 @@ Krita 5.2.3
 - Added recent palette history.
 - Improved error handling.
 
+05/19/2025 **v1.1.1**
+- Decreased color palette size from 15 to 10 colors
+- Added toggling between previously regenerated palettes (up to 5)
+
 ### License
 Image to Palette is shared under the GNU General Public License (GPL), version 3.

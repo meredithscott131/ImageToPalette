@@ -26,12 +26,13 @@ class PaletteGrid(QGridLayout):
         super().__init__()
         self.setAlignment(Qt.AlignTop)
         self.setContentsMargins(5, 3, 5, 5)
+        self.setSpacing(5)
 
     # Displays the color labels in the grid
     def displayColorsInGrid(self, palette, selectable=True):
         colors = [int(color.lstrip('#'), 16) for color in palette.cur_colors]
         num_cols = 5
-        num_rows = 3
+        num_rows = 2
 
         # Iterates through each color and makes it a label
         for i, color in enumerate(colors):
@@ -82,24 +83,37 @@ class UIManager:
         main_layout = QVBoxLayout()
 
         # Top-most row of buttons and Recent Palettes ComboBox
-        button_layout = self.create_button_layout()
-        main_layout.addLayout(button_layout)
+        top_button_layout = self.create_top_button_layout()
+        main_layout.addLayout(top_button_layout)
 
         # Label displaying the origin image name of the palette
         self.parent.image_name_label = QLabel("No palette loaded")
         self.parent.image_name_label.setContentsMargins(5, 5, 5, 5)
         main_layout.addWidget(self.parent.image_name_label)
 
-        # 15-color palette grid
+        # 15-color palette grid inside a widget to fix layout stretching
+        palette_widget = QWidget()
+        palette_layout = QVBoxLayout(palette_widget)
+        palette_layout.setContentsMargins(0, 0, 0, 0)
+        palette_layout.setSpacing(0)
+
         self.parent.palette_layout = PaletteGrid()
-        main_layout.addLayout(self.parent.palette_layout)
+        palette_layout.addLayout(self.parent.palette_layout)
+
+        main_layout.addWidget(palette_widget, stretch=1)  # stretch=1 ensures it takes vertical space
+
+
+        # Bottom-most row of buttons
+        bottom_button_layout = self.create_bottom_button_layout()
+        main_layout.addLayout(bottom_button_layout)
+        main_layout.addStretch()
 
         main_widget.setLayout(main_layout)
         self.create_default_grid()
         return main_widget
 
     # Creates and returns the button layout
-    def create_button_layout(self):
+    def create_top_button_layout(self):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(0)
         button_layout.setContentsMargins(0, 0, 0, 0)
@@ -117,11 +131,6 @@ class UIManager:
         self.parent.button_save = self.create_button('document-save', 'Save Palette',
                                                      self.parent.file_manager.save_palette_dialog, False)
         
-        # Button for regenerating a new set of 15-colors for the currently loaded palette
-        # Disabled until a palette is loaded
-        self.parent.button_regenerate = self.create_button('view-refresh', 'Regenerate Palette',
-                                                           self.parent.palette_manager.regenerate_palette, False)
-        
         # ComboBox for displaying the 5 most recently opened saved palettes
         self.parent.recent_palettes_combo = QComboBox()
         self.parent.recent_palettes_combo.setEditable(True)
@@ -136,10 +145,52 @@ class UIManager:
         button_layout.addWidget(self.parent.button_load)
         button_layout.addWidget(self.parent.button_load_palette)
         button_layout.addWidget(self.parent.button_save)
-        button_layout.addWidget(self.parent.button_regenerate)
         button_layout.addWidget(self.parent.recent_palettes_combo)
 
         return button_layout
+    
+    def create_bottom_button_layout(self):
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(0)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Button for regenerating a new set of 15-colors for the currently loaded palette
+        # Disabled until a palette is loaded
+        self.parent.button_regenerate = self.create_button('updateColorize', 'Regenerate Palette',
+                                                           self.parent.palette_manager.regenerate_palette, False)
+        
+        # Button for returning the previously generated palette
+        self.parent.button_previous = self.create_button(
+            'arrow-left', 'Previous', self.parent.palette_manager.show_previous_palette, False)
+
+        # Button for returning the next generated palette
+        self.parent.button_next = self.create_button(
+            'arrow-right', 'Next', self.parent.palette_manager.show_next_palette, False)
+        
+        """
+        # Label displaying the current palette index
+        self.parent.palette_index_label = QLabel("")
+        self.parent.palette_index_label.setAlignment(Qt.AlignCenter)
+
+        index_label_widget = QWidget()
+        index_label_layout = QVBoxLayout(index_label_widget)
+        index_label_layout.addStretch()
+        index_label_layout.addWidget(self.parent.palette_index_label)
+        index_label_layout.addStretch()
+        index_label_layout.setContentsMargins(5, 0, 5, 0)
+        """
+        
+        button_layout.addWidget(self.parent.button_regenerate)
+        button_layout.addWidget(self.parent.button_previous)
+        button_layout.addWidget(self.parent.button_next)
+        #button_layout.addWidget(index_label_widget)
+
+        # Align the buttons to the left
+        button_layout.addStretch()
+        button_layout.setAlignment(Qt.AlignLeft)
+
+        return button_layout
+
 
     # Creates and returns a button with the given icon, tooltip, function call, and enabled state
     def create_button(self, icon_name, tooltip, callback, enabled=True):
@@ -156,7 +207,7 @@ class UIManager:
     # Creates the default palette grid out of gray, unselectable color labels
     def create_default_grid(self):
         placeholder_palette = Palette()
-        for _ in range(15):
+        for _ in range(10):
             placeholder_palette.add_color("#919191")
         self.parent.palette_layout.displayColorsInGrid(placeholder_palette, selectable=False)
 
