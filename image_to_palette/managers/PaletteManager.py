@@ -32,8 +32,8 @@ class PaletteManager:
 
         palette.total_colors = most_common_colors
 
-    # Shuffles the current set of most common colors and sets the current set of displayed colors
-    def regenerate_palette(self):
+    # Generates a new palette from the current set of most common colors
+    def generate_palette(self):
         # Generate new palette
         palette = self.parent.palette
         random.shuffle(palette.total_colors)
@@ -63,6 +63,8 @@ class PaletteManager:
         self.update_nav_buttons()
         #self.update_index_label()
 
+    # Changes the current palette to the previous one in the list
+    # If at the first palette, wrap to the last
     def show_previous_palette(self):
         index = self.parent.palette.get_index()
         length = len(self.parent.palette.palette_list)
@@ -82,6 +84,8 @@ class PaletteManager:
         #self.update_index_label()
 
 
+    # Changes the current palette to the next one in the list
+    # If at the last palette, wrap to the first
     def show_next_palette(self):
         index = self.parent.palette.get_index()
         length = len(self.parent.palette.palette_list)
@@ -117,17 +121,16 @@ class PaletteManager:
         palette_snapshot.image_name = self.parent.palette.image_name
 
         self.parent.palette.palette_list.append(palette_snapshot)
-        self.parent.palette.set_index(0)  # Default to first (visible as "1/1")
+        self.parent.palette.set_index(0)
 
         self.update_nav_buttons()
         #self.update_index_label()
         self.parent.button_regenerate.setEnabled(True)
         self.parent.button_save.setEnabled(True)
 
-    
+    # Updates the state of the navigation buttons based on the number of palettes
     def update_nav_buttons(self):
         length = len(self.parent.palette.palette_list)
-        # With wrap-around, only disable if < 2 palettes
         self.parent.button_previous.setEnabled(length > 1)
         self.parent.button_next.setEnabled(length > 1)
 
@@ -140,14 +143,3 @@ class PaletteManager:
         else:
             self.parent.palette_index_label.setText("0/0")
     """
-
-    def generate_palette(self):
-        palette = self.parent.palette
-        random.shuffle(palette.total_colors)
-        num_colors = 10
-        step = max(1, len(palette.total_colors) // num_colors)
-        palette_colors = [palette.total_colors[i * step][0] for i in range(num_colors)]
-
-        palette.clear_colors()
-        for color in palette_colors:
-            palette.add_color(f'#{color:06x}')
