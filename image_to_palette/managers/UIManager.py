@@ -91,7 +91,7 @@ class UIManager:
         self.parent.image_name_label.setContentsMargins(5, 5, 5, 5)
         main_layout.addWidget(self.parent.image_name_label)
 
-        # 15-color palette grid inside a widget to fix layout stretching
+        # 10-color palette grid inside a widget to fix layout stretching
         palette_widget = QWidget()
         palette_layout = QVBoxLayout(palette_widget)
         palette_layout.setContentsMargins(0, 0, 0, 0)
@@ -100,7 +100,7 @@ class UIManager:
         self.parent.palette_layout = PaletteGrid()
         palette_layout.addLayout(self.parent.palette_layout)
 
-        main_layout.addWidget(palette_widget, stretch=1)  # stretch=1 ensures it takes vertical space
+        main_layout.addWidget(palette_widget, stretch=1)
 
 
         # Bottom-most row of buttons
@@ -112,7 +112,7 @@ class UIManager:
         self.create_default_grid()
         return main_widget
 
-    # Creates and returns the button layout
+    # Creates and returns the top button layout
     def create_top_button_layout(self):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(0)
@@ -149,21 +149,24 @@ class UIManager:
 
         return button_layout
     
+    # Creates and returns the bottom button layout
     def create_bottom_button_layout(self):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(0)
         button_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Button for regenerating a new set of 15-colors for the currently loaded palette
+        # Button for regenerating a new set of 10-colors for the currently loaded palette
         # Disabled until a palette is loaded
         self.parent.button_regenerate = self.create_button('updateColorize', 'Regenerate Palette',
-                                                           self.parent.palette_manager.regenerate_palette, False)
+                                                           self.parent.palette_manager.generate_palette, False)
         
         # Button for returning the previously generated palette
+        # Disabled until at least 2 palettes are generated
         self.parent.button_previous = self.create_button(
             'arrow-left', 'Previous', self.parent.palette_manager.show_previous_palette, False)
 
         # Button for returning the next generated palette
+        # Disabled until at least 2 palettes are generated
         self.parent.button_next = self.create_button(
             'arrow-right', 'Next', self.parent.palette_manager.show_next_palette, False)
         
